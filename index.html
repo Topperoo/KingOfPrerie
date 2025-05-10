@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Моя Игра - Король Прерий </title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Король Прерий </h1>
+    </header>
+
+    <main>
+        <div class="game-container">
+            <div class="game-info">
+                <span>🏆 Очки: <span id="score">0</span></span>
+                <span id="lives-container"></span>
+                <span id="ultimate-charges-container"></span>
+            </div>
+            <canvas id="gameCanvas"></canvas>
+        </div>
+
+        <nav class="main-menu">
+            <ul>
+                <li><button id="menu-about">Об игре</button></li>
+                <li><button id="menu-play">Играть</button></li>
+                <li><button id="menu-scores">Результаты</button></li>
+            </ul>
+        </nav>
+
+        <div class="content-area">
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Topperoo</p>
+    </footer>
+
+    <script src="game.js" defer></script>
+</body>
+</html>
