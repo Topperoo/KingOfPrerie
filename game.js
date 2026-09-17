@@ -2005,41 +2005,77 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     showAbout(); 
     gameLoop();
-    async function saveScore(name, score) {
+    const LOCAL_SCORES_KEY = 'kingOfPrerie.scores';
+
+    function readLocalScores() {
         try {
-            const survivalTimeInSeconds = Math.floor(player.survivalTime / 60);
-            
+            const stored = JSON.parse(localStorage.getItem(LOCAL_SCORES_KEY));
+            return Array.isArray(stored) ? stored : [];
+        } catch (error) {
+            return [];
+        }
+    }
+
+    function writeLocalScore(entry) {
+        try {
+            const scores = readLocalScores();
+            scores.push(entry);
+            localStorage.setItem(LOCAL_SCORES_KEY, JSON.stringify(scores));
+            return true;
+        } catch (error) {
+            console.error('Error saving score locally:', error);
+            return false;
+        }
+    }
+
+    async function saveScore(name, score) {
+        const entry = {
+            name,
+            score,
+            monstersKilled: player.monstersKilled,
+            potionsCollected: player.potionsCollected,
+            survivalTime: Math.floor(player.survivalTime / 60),
+            timestamp: new Date().toISOString()
+        };
+
+        try {
             const response = await fetch('/api/scores', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ 
-                    name, 
-                    score,
-                    monstersKilled: player.monstersKilled,
-                    potionsCollected: player.potionsCollected,
-                    survivalTime: survivalTimeInSeconds
-                }),
+                body: JSON.stringify(entry),
             });
-            
-            const result = await response.json();
-            return result.success;
+
+            if (response.ok) {
+                const result = await response.json();
+                if (result.success) {
+                    return true;
+                }
+            }
         } catch (error) {
             console.error('Error saving score:', error);
-            return false;
         }
+
+        return writeLocalScore(entry);
     }
 
     async function getScores(limit = 10) {
         try {
             const response = await fetch(`/api/scores?limit=${limit}`);
-            const scores = await response.json();
-            return scores;
+            if (response.ok) {
+                const scores = await response.json();
+                if (Array.isArray(scores)) {
+                    return scores;
+                }
+            }
         } catch (error) {
             console.error('Error fetching scores:', error);
-            return [];
         }
+
+        return readLocalScores()
+            .sort((a, b) => b.score - a.score || new Date(a.timestamp) - new Date(b.timestamp))
+            .slice(0, limit);
     }
 
     let playerNameInput = null;
